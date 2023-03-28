@@ -1,0 +1,322 @@
+---
+title: Exploring Individual and Sex Differences in Trace Eyeblink Conditioning (EBC) in 4- to 6- year-olds
+title_textsize: "63pt"
+author:
+  - name: Hannah Bowley
+    affil: 1
+    orcid: '0009-0000-2955-016X'
+  - name: Yinbo Wu
+    affil: 1
+  - name: Priscilla Lioi
+    affil: 1
+  - name: Vanessa Vieites
+    affil: 2
+  - name: Yvonne Ralph
+    affil: 3
+  - name: Melanie Rengel
+    affil: 1
+  - name: Amanda Renfro
+    affil: 1
+  - name: Timothy Hayes
+    affil: 1
+  - name: Anthony Dick
+    affil: 1
+  - name: Aaron Mattfeld
+    affil: 1
+  - name: Shannon Pruden
+    affil: 1
+author_textsize: "50pt"
+
+affiliation:
+  - num: 1
+    address: Florida International University
+  - num: 2
+    address: Rutgers University
+  - num: 3
+    address: University of Texas at Tyler
+affiliation_textsize: "40pt"
+column_numbers: 4
+logoright_name: seahorse_logo_2.png
+logoleft_name: https&#58;//brand.fiu.edu/_assets/images/fiu-logo-vertical.png 
+output: 
+  posterdown::posterdown_html:
+    self_contained: TRUE
+knit: pagedown::chrome_print
+bibliography: srcd.bib
+primary_colour: "#F26A94"
+accent_colour: "#fbaa19"
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message= FALSE)
+```
+
+# Introduction
+
+* Eyeblink Conditioning (EBC) is a form of Pavlovian conditioning that uses tone and air puff pairings to over time develop a learned association of the two stimuli within a subject. 
+* Trace EBC is a novel technique used to gain a better understanding of hippocampal and cerebral-dependent learning that has been previously employed in both adults and animal subjects [@takehara_time-dependent_2003]; [@cheng_neural_2008];[@vieites_using_2020].
+* This study used Trace EBC to evaluate developmental changes in associative learning using the following metrics:
+  - **Conditioned Response** (CR%) defined as the number of Eye Blinks occurring during trace period following the presentation of tone in paired trials and tone alone trials and prior to onset of unconditioned stimulus in paired trials - *Accuracy*
+  - **Onset Latency** defined as onset time of blinks during paired and tone alone trials - *Precision*
+
+## Objectives
+
+**Aim-1:**  Examine individual differences in accuracy across blocks as measured through Conditioned Response Percentage (CR%)  
+
+**Aim-2:** Examine individual differences in precision across blocks as measured through changes in SD of Onset Latency 
+
+# Methods
+
+* **Participants: ** Sixty-seven typically developing 4- to 6- years old’s completed a trace EBC task. 
+
+* **Task:** conditioned stimulus presentation (i.e., tone) followed by a 500-ms trace period of no stimulus presentation and a subsequent unconditioned stimulus (i.e., air puff to eye). Responses to stimuli (i.e., eye blinks) were measured. Stimuli presentation lasted approximately 15 minutes. 
+  - The EBC task consisted of 104 trials, one block of 4 practice trials to acclimate children to the stimuli and 10 blocks of test trials. Each test block consisted of 10 trials: 8- paired tone and air puff trials, 1- puff alone trial administered halfway through paired trials, and a final tone alone trial.    
+
+**Analysis:** Linear Mixed Effects models were implemented using *lme4* package [@bates_lme4_2023] 
+  
+
+    
+# Results- Accuracy
+
+
+
+ **No age related differences in *accuracy* on Trace EBC task as measured through Conditioned Response (%) across blocks**  
+ 
+ :Type III AOV with Satterhwaite's Method: CR (%) ~ Age * Block
+
+|                   | Sum Sq | Mean Sq | DF  | F Value | Pr(\>F)   |
+|-------------------|--------|---------|-----|---------|-----------|
+| Block             | 2932.7 | 325.85  | 9   | 1.6538  | 0.09747   |
+| Child Age         | 66.5   | 66.48   | 1   | 0.3374  | 0.56350   |
+| Block X Child Age | 3279.8 | 364.42  | 9   | 1.8495  | 0.05735   |
+
+```{r standard-plot, out.width='91%', fig.align='center', fig.cap=' ', fig.height=5}
+library(tidyverse)
+library(lme4)
+library(rstatix)
+library(ggpubr)
+EBC_master_file <- read.csv("C:/Users/hanna/OneDrive - Florida International University/PLSD/seahorse_r/EBC/EBC_master_file.csv")
+
+EBC_master_file$AGE_int <- as.integer(EBC_master_file$age_at_study)
+EBC_master_file <- subset(EBC_master_file, EBC_master_file$AGE_int >= 4)
+
+EBC_CR <- EBC_master_file %>%
+  group_by(subjectid)%>%
+  select(CR_percentage_2,
+         CR_percentage_3,
+         CR_percentage_4,
+         CR_percentage_5,
+         CR_percentage_6,
+         CR_percentage_7,
+         CR_percentage_8,
+         CR_percentage_9,
+         CR_percentage_10,
+         CR_percentage_11,
+         age_at_study,
+         child_sex,
+         AGE_int
+         
+  )
+
+
+
+
+EBC_CR_long <- gather(EBC_CR, Block, CR_AVG, c(CR_percentage_2,
+                                               CR_percentage_3,
+                                               CR_percentage_4,
+                                               CR_percentage_5,
+                                               CR_percentage_6,
+                                               CR_percentage_7,
+                                               CR_percentage_8,
+                                               CR_percentage_9,
+                                               CR_percentage_10,
+                                               CR_percentage_11
+))%>%
+  convert_as_factor(subjectid, Block, AGE_int)
+
+plot <-  ggplot(EBC_CR_long, aes(sample=CR_AVG, x =)) +
+  stat_qq() + 
+  stat_qq_line()+
+  facet_grid(Block ~ AGE_int)
+
+
+plot <- ggplot(EBC_CR_long,
+               aes(x = Block, y = CR_AVG, fill = factor(AGE_int, levels = c("4", "5", "6"))))+
+               scale_x_discrete(
+                 labels = c("1", "2", "3", "4", "5", "6",                              "7", "8", "9", "10")) +
+               labs( y = "CR (%)", title = "Conditioned Response (%) across blocks by Age") +
+               scale_fill_manual(values = c("#c6d940", "#bc97c6", "#43c3ee"), name = "Child Age")+
+              geom_boxplot(alpha = 0.5) +
+  theme(
+  panel.background = element_rect(fill = "transparent",
+                                colour = "#fbaa19",
+                                size = 0.5, linetype = "solid"),
+  panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                colour = "white"), 
+  panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+                                colour = "white")
+  ) 
+
+plot
+
+# model <- lmer(CR_AVG ~ Block * AGE_int+ (1|subjectid), data = EBC_CR_long)
+# summary(model)
+# anova(model, test = "F", type = "III")
+```
+**No sex related differences in *accuracy* on Trace EBC task as measured through Conditioned Response (%) across blocks**  
+
+ :Type III AOV with Satterhwaite's Method: CR (%) ~ Sex * Block
+
+|                   | Sum Sq | Mean Sq | DF  | F Value | Pr(\>F)   |
+|-------------------|--------|---------|-----|---------|-----------|
+| Block             |1354.60 | 150.511 | 9   | 0.7455  | 0.6671    |
+| Child Sex         | 12.23  | 12.235  | 1   | 0.0606  | 0.8064    |
+| Block X Child Sex | 872.46 | 96.940  | 9   | 0.4802  | 0.8882    |  
+  
+  
+```{r out.width='90%', echo=FALSE, fig.cap='', fig.height=5,fig.align='center'}
+plot <- ggplot(EBC_CR_long,
+               aes(x = Block, y = CR_AVG, fill = factor(child_sex)))+
+               scale_x_discrete(
+                 labels = c("1", "2", "3", "4", "5", "6",                              "7", "8", "9", "10")) +
+               labs( y = "CR (%)", title = "Conditioned Response (%) across blocks by Sex") +
+               scale_fill_manual(values = c( "#ee4276","#fbaa19"), name = "Child Sex")+
+              geom_boxplot(alpha = 0.5) +
+  theme(
+  panel.background = element_rect(fill = "transparent",
+                                colour = "#c6d940",
+                                size = 0.5, linetype = "solid"),
+  panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                colour = "white"), 
+  panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+                                colour = "white")
+  ) 
+
+plot
+```  
+
+# Results- Precision
+
+  
+ **No age related differences in *precision* on Trace EBC task as measured through Onset Latency (SD) across blocks**   
+ 
+ :Type III AOV with Satterhwaite's Method: Onset Latency ~ Age * Block
+
+|                   | Sum Sq | Mean Sq | DF  | F Value | Pr(\>F)   |
+|-------------------|--------|---------|-----|---------|-----------|
+| Block             | 315785 | 35087   | 9   | 1.7857  | 0.06943   |
+| Child Age         | 2663   | 2663    | 1   | 0.1355  | 0.71425   |
+| Block X Child Age | 298441 | 33160   | 9   | 1.6876  | 0.09025   |  
+
+<br/>  
+ 
+```{r morefigs, out.width='90%', echo=FALSE, fig.cap='', fig.height=5,fig.align='center'}
+EBC_latency_sd_age <- EBC_master_file %>%
+  group_by(subjectid)%>%
+  select(CR_Onset_sd_2,
+         CR_Onset_sd_3,
+         CR_Onset_sd_4,
+         CR_Onset_sd_5,
+         CR_Onset_sd_6,
+         CR_Onset_sd_7,
+         CR_Onset_sd_8,
+         CR_Onset_sd_9,
+         CR_Onset_sd_10,
+         CR_Onset_sd_11,
+         age_at_study,
+         child_sex,
+         AGE_int,
+         
+  )
+
+
+## change data to long format
+EBC_latency_sd_age_long <- gather(EBC_latency_sd_age, "Block", "Onset_Latency", c(CR_Onset_sd_2,
+                                                                                  CR_Onset_sd_3,
+                                                                                  CR_Onset_sd_4,
+                                                                                  CR_Onset_sd_5,
+                                                                                  CR_Onset_sd_6,
+                                                                                  CR_Onset_sd_7,
+                                                                                  CR_Onset_sd_8,
+                                                                                  CR_Onset_sd_9,
+                                                                                  CR_Onset_sd_10,
+                                                                                  CR_Onset_sd_11
+))%>%
+  convert_as_factor(subjectid, Block, AGE_int)
+
+plot <- ggplot(EBC_latency_sd_age_long,
+               aes(x = Block, y = Onset_Latency, fill = factor(AGE_int, levels = c("4", "5", "6"))))+
+               scale_x_discrete(
+                 labels = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10")) +
+               labs( y = "Onset Latency Std Dev", title = "Onset Latency Std Dev across blocks by Age") +
+               scale_fill_manual(values = c("#c6d940", "#bc97c6", "#43c3ee"), name = "Child Age")+
+              geom_boxplot(alpha = 0.5) +
+  theme(
+  panel.background = element_rect(fill = "transparent",
+                                colour = "#fbaa19",
+                                size = 0.5, linetype = "solid"),
+  panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                colour = "white"), 
+  panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+                                colour = "white")
+  ) 
+
+plot
+```
+
+
+**No sex related differences in *precision* on Trace EBC task as measured through Onset Latency (SD) across blocks**  
+
+:Type III AOV with Satterhwaite's Method: Onset Latency ~ Sex * Block
+
+|                   | Sum Sq | Mean Sq | DF  | F Value | Pr(\>F)   |
+|-------------------|--------|---------|-----|---------|-----------|
+| Block             | 358550 | 39839   | 9   | 1.95750 | 0.04112\* |
+| Child Sex         | 146    | 146     | 1   | 0.0072  | 0.93259   |
+| Block X Child Sex | 107262 | 11918   | 9   | 0.5908  | 0.80470   |  
+
+
+```{r morefigs2, out.width='90%', echo=FALSE, fig.cap='', fig.height=5,fig.align='center'}
+plot <- ggplot(EBC_latency_sd_age_long,
+               aes(x = Block, y = Onset_Latency, fill = factor(child_sex)))+
+               scale_x_discrete(
+                 labels = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10")) +
+               labs( y = "Onset Latency Std Dev", title = "Onset Latency Std Dev across blocks by Sex") +
+               scale_fill_manual(values = c( "#ee4276","#fbaa19"), name = "Child Age")+
+              geom_boxplot(alpha = 0.5) +
+  theme(
+  panel.background = element_rect(fill = "transparent",
+                                colour = "#c6d940",
+                                size = 0.5, linetype = "solid"),
+  panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                colour = "white"), 
+  panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+                                colour = "white")
+  ) 
+
+plot
+```
+
+
+# Discussion
+
+* The findings suggest no age or sex related differences in both precision and accuracy in a Trace Eyeblink Conditioning task as measured through conditioned responses (%) and blink onset latency. 
+* As seen through Figure 1 and Figure 2, children in this age range were performing below chance in CR(%) suggesting that they were not learning the association across trial blocks.
+* The lack of changes in standard deviation across trial blocks indicates children were also not getting more precise with their blinks across trial blocks.
+* Future directions: Are there individual differences in Delay EBC compared to Trace EBC? At what age do children develop the association?
+
+
+
+# References
+<div id = "refs"></div>
+
+```{r, include=FALSE}
+knitr::write_bib("srcd.bib")
+```
+
+# Acknowledgments
+This work is supported by the NIH under Grant [R01HD098152]. For more information on this study please visit *http://plsd.fiu.edu* or contact Hannah Bowley at *hbowley@fiu.edu*  
+```{r echo=FALSE, fig.align = "right", out.width='15%'}
+knitr::include_graphics('qr-code.png')
+```

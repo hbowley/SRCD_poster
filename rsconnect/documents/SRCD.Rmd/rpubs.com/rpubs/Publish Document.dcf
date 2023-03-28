@@ -1,0 +1,11 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/1017909/ca4c94cc86724b679fcbc4ab93d0755d
+bundleId: https://api.rpubs.com/api/v1/document/1017909/ca4c94cc86724b679fcbc4ab93d0755d
+url: http://rpubs.com/hbowley/1017909
+when: 1679358712.87686
+lastSyncTime: 1679358712.87687
